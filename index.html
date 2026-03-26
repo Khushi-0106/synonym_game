@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Synonym Game</title>
+</head>
+<body style="font-family: Arial; text-align:center; margin-top:50px;">
+
+    <h1>🎮 Guess the Word Game</h1>
+    <p id="hint"></p>
+
+    <input type="text" id="userInput" placeholder="Enter your guess">
+    <button onclick="checkAnswer()">Submit</button>
+
+    <p id="result"></p>
+
+    <script>
+        const wordMap = {
+            "library": ["books", "reading", "study", "knowledge"],
+            "car": ["vehicle", "automobile", "drive", "transport"],
+            "teacher": ["mentor", "guide", "educator", "professor"],
+            "computer": ["machine", "technology", "device", "system"],
+            "phone": ["mobile", "call", "communication", "device"]
+        };
+
+        const keys = Object.keys(wordMap);
+        const targetWord = keys[Math.floor(Math.random() * keys.length)];
+
+        document.getElementById("hint").innerText = 
+            "Hint: " + wordMap[targetWord].join(", ");
+
+        function getDistance(a, b) {
+            const dp = Array(a.length + 1).fill(null)
+                .map(() => Array(b.length + 1).fill(0));
+
+            for (let i = 0; i <= a.length; i++) {
+                for (let j = 0; j <= b.length; j++) {
+                    if (i === 0) dp[i][j] = j;
+                    else if (j === 0) dp[i][j] = i;
+                    else if (a[i - 1] === b[j - 1])
+                        dp[i][j] = dp[i - 1][j - 1];
+                    else
+                        dp[i][j] = 1 + Math.min(
+                            dp[i - 1][j - 1],
+                            dp[i - 1][j],
+                            dp[i][j - 1]
+                        );
+                }
+            }
+            return dp[a.length][b.length];
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById("userInput").value.toLowerCase();
+
+            if (input === targetWord) {
+                document.getElementById("result").innerText = "🎉 Correct!";
+                return;
+            }
+
+            let isClose = wordMap[targetWord].some(word => input.includes(word));
+            let distance = getDistance(targetWord, input);
+
+            if (distance <= 2) {
+                document.getElementById("result").innerText = "🟡 Very close!";
+            } else if (isClose) {
+                document.getElementById("result").innerText = "🟡 Close!";
+            } else {
+                document.getElementById("result").innerText = "❌ Not close!";
+            }
+        }
+    </script>
+
+</body>
+</html>
